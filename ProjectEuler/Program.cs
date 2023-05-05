@@ -122,7 +122,8 @@ namespace ProjectEuler
             bool loopIndex = true;
             bool indexPrimeLoop = false;
             int largestPrime = 0;
-            int targetNum = 1000;
+            int indexOfLastElement = 1;
+            int targetNum = 1000000;
 
             //Primtalen måste inte börja med 2. Kan börja med 5, 13 osv. De måste följa varandra, men inte från 2.
             //Hitta största primtalet! Inte talet med flest primtal i rad.
@@ -137,32 +138,49 @@ namespace ProjectEuler
                         sumOfPrimes = sumOfPrimes + item;
                     }
                     if (sumOfPrimes < targetNum)
-                    {                        
-                        Console.WriteLine("Prime number: " + num + ", sum: " + sumOfPrimes);
+                    {
                         primeSumList.Add(sumOfPrimes);
                     }
                     else indexPrimeLoop = true;
                     if (indexPrimeLoop)
                     {
-                        for (int indexOfPrime = 0; indexOfPrime < primeList.Last(); indexOfPrime++)
+                        indexOfLastElement = primeList.IndexOf(primeList.Last());
+                        for (int indexOfPrime = 0; indexOfPrime < indexOfLastElement; indexOfPrime++)
                         {
                             loopIndex = true;
                             sumOfPrimes = 0;
-                            indexOfPrime++;
                             for (int index = indexOfPrime; loopIndex; index++)
                             {
-                                if (index < primeList.Last()) sumOfPrimes = sumOfPrimes + primeList[index];
-                                Console.WriteLine("Sum of primes: " + sumOfPrimes);
+                                if (index < indexOfLastElement) sumOfPrimes = sumOfPrimes + primeList[index];
+                                else loopIndex = false;
                                 if (sumOfPrimes < targetNum)
                                 {
                                     if (primeSumList.Contains(sumOfPrimes) == false) primeSumList.Add(sumOfPrimes);
-                                }
-                                else loopIndex = false;
-                            }                            
+                                }                                
+                            }
                         }
                         loop = false;
-                    }                    
+                    }
                 }
+                /*
+                 * 2, 3, 5, 7, 11
+                 * sum (2-11)
+                 * sum (3 - 11)
+                 * for (startIndex = 0; startIndex <= lastIndex; ++startIndex)
+                 * 
+                 * int sum = 0
+                 * 
+                 * for (index = startIndex; index >= lastIndex; ++index)
+                 * {
+                 *      if (sum + lista[index] > 1000) break
+                 *      sum += lista[index]
+                 *      }
+                 *   
+                 *  spara sum
+                 *  
+                 */
+
+
             }
             foreach (int item in primeSumList)
             {
