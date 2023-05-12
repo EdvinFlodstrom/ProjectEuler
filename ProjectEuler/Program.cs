@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace ProjectEuler
@@ -8,7 +9,7 @@ namespace ProjectEuler
     {
         static void Main(string[] args)
         {
-            Problem_50();
+            Problem_54();
         }
         static void Problem_1()
         {
@@ -203,5 +204,134 @@ namespace ProjectEuler
             }
             return prime;
         }
-    }
+        static void Problem_54()
+        {
+            string docPath =
+  Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            string pathAndFileName = Path.Combine(docPath, "p054_poker.txt");
+
+            //C = Clubs; D = Diamond; H = Hearts; S = Spades
+            List<string> player1Hand = new List<string>();
+            List<string> player2Hand = new List<string>();
+            int player1HandStrength = 0;
+            int player2HandStrength = 0;
+
+            int player1Wins = 0;
+            int player2Wins = 0;
+
+            using (var sr = new StreamReader(pathAndFileName))
+            {
+                string row = "placeHolder";
+                while (row != null)
+                {                    
+                    row = sr.ReadLine();                                        
+                    if (row != null)
+                    {
+                        String[] cards = row.Split(' '); //Tar första raden och sparar varje element i en array separerat vid mellanslag
+                        for (int i = 0; i < cards.Length; ++i)
+                        {
+                            if (i < 5)
+                            {
+                                player1Hand.Add(cards[i]); //Spelare 1 för första fem korten.
+                            }
+                            else
+                            {
+                                player2Hand.Add(cards[i]); //Spelare 2 för resten av korten, alltså de sista fem.
+                            }
+                        }
+
+                        player1Hand.Clear();
+                        player1Hand.Add("TH");
+                        player1Hand.Add("JH");
+                        player1Hand.Add("QH");
+                        player1Hand.Add("KH");
+                        player1Hand.Add("AH");
+
+
+                        player1HandStrength = HandStrength(player1Hand); //Beräknar styrkan av spelarnas kort, i en int.
+                        //player2HandStrength = HandStrength(player2Hand);
+                        if (player1HandStrength > 10)
+                        {
+                            Console.WriteLine("p1 strength " + player1HandStrength);
+                            foreach (string item in player1Hand)
+                            {
+                                Console.WriteLine(item);
+                            }
+                            break;
+                        }
+                        if (WinningHand(player1HandStrength, player2HandStrength) == 1)
+                        {
+                            player1Wins++; //Avgör vilken av spelarna som hade bäst hand, och ökar vinnarens antal vinster med 1.
+                        }
+                        else
+                        {
+                            player2Wins++;
+                        }
+                        player1Hand.Clear();
+                        player2Hand.Clear();
+                    }
+                }
+            }
+        }
+        static int HandStrength(List<string> hand)
+        {
+            bool royalFlush = false;
+            int strength = 0;
+            bool sameSuit = true;
+            List<char> cardRanks = new List<char>();            
+            cardRanks.Add('T');
+            cardRanks.Add('J');
+            cardRanks.Add('Q');
+            cardRanks.Add('Q');
+            cardRanks.Add('A');
+
+            foreach (string item in hand) //Kollar ifall alla kort tillhör samma färg.
+            {
+                char suit = item[1]; 
+                if (item[1] != suit)
+                {
+                    sameSuit = false;
+                }
+            }
+
+            if (sameSuit) //Funktion fungerar ej. Funktion ska kolla efter Royal flush.
+            {                
+                foreach (string item in hand)
+                {                   
+                    if (cardRanks.Contains(item[0]))
+                    {
+                        cardRanks.Remove(item[0]);
+                        royalFlush = true;
+                    }
+                    else
+                    {
+                        royalFlush = false;
+                        break;
+                    }
+                }
+                if (royalFlush)
+                {
+                    strength = 999; //Royal flush strength
+                }
+                
+            }
+            
+
+            return strength;
+        }
+        static int WinningHand(int player1HandStrength, int player2HandStrength)
+        {
+            int winningPlayer = 0;
+
+            if (player1HandStrength > player2HandStrength)
+            {
+                winningPlayer = 1;
+            }
+            else
+            {
+                winningPlayer = 2;
+            }
+            return winningPlayer;
+        }
+    }    
 }
