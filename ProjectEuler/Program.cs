@@ -240,25 +240,27 @@ namespace ProjectEuler
                             }
                         }
 
+                        
                         player1Hand.Clear();
-                        player1Hand.Add("TH");
-                        player1Hand.Add("JH");
-                        player1Hand.Add("QH");
-                        player1Hand.Add("KH");
-                        player1Hand.Add("AH");
+                        player1Hand.Add("3D");
+                        player1Hand.Add("2D");
+                        player1Hand.Add("5D");
+                        player1Hand.Add("1D");
+                        player1Hand.Add("4D");
+                        
 
 
                         player1HandStrength = HandStrength(player1Hand); //Beräknar styrkan av spelarnas kort, i en int.
                         //player2HandStrength = HandStrength(player2Hand);
-                        if (player1HandStrength > 10)
+                        if (player1HandStrength > 10) //Hela denna if-sats är endast till för debugging.
                         {
                             Console.WriteLine("p1 strength " + player1HandStrength);
                             foreach (string item in player1Hand)
                             {
                                 Console.WriteLine(item);
-                            }
-                            break;
+                            }                            
                         }
+                        break; //Avbryter programmet efter en körning. *ENDAST FÖR DEBUGGING*
                         if (WinningHand(player1HandStrength, player2HandStrength) == 1)
                         {
                             player1Wins++; //Avgör vilken av spelarna som hade bäst hand, och ökar vinnarens antal vinster med 1.
@@ -282,21 +284,22 @@ namespace ProjectEuler
             cardRanks.Add('T');
             cardRanks.Add('J');
             cardRanks.Add('Q');
-            cardRanks.Add('Q');
+            cardRanks.Add('K');
             cardRanks.Add('A');
 
+            string firstChard = hand[0];
+            char suit = firstChard[1];
             foreach (string item in hand) //Kollar ifall alla kort tillhör samma färg.
-            {
-                char suit = item[1]; 
+            {                
                 if (item[1] != suit)
                 {
                     sameSuit = false;
                 }
             }
 
-            if (sameSuit) //Funktion fungerar ej. Funktion ska kolla efter Royal flush.
+            if (sameSuit) //Är spelarens alla kort i samma färg?
             {                
-                foreach (string item in hand)
+                foreach (string item in hand) //Kollar ifall spelaren har en royal flush.
                 {                   
                     if (cardRanks.Contains(item[0]))
                     {
@@ -311,13 +314,60 @@ namespace ProjectEuler
                 }
                 if (royalFlush)
                 {
-                    strength = 999; //Royal flush strength
+                    return 999; //Skickar tillbaka värdet av en royal flush; 999. Högst möjliga styrka.
                 }
-                
+                else //Kollar ifall spelaren har en straight flush
+                {
+                    List<int> cardValueList = new List<int>();
+                    foreach (string item in hand)
+                    {
+                        char cardChar = item[0];
+                        int cardValue = 0;
+                        if (cardChar == 'T')
+                        {
+                            cardValue = 10;
+                        }
+                        else if (cardChar == 'J')
+                        {
+                            cardValue = 11;
+                        }
+                        else if (cardChar == 'Q')
+                        {
+                            cardValue = 12;
+                        }
+                        else if (cardChar == 'K')
+                        {
+                            cardValue = 13;
+                        }
+                        else if (cardChar == 'A')
+                        {
+                            cardValue = 14;
+                        }
+                        else
+                        {
+                            cardValue = cardChar - '0';
+                        }
+                        cardValueList.Add(cardValue); //Sparar värdena av korten i en lista. Klädda kort (även tio) räknas om till en int-vänlig ekvivalent. T = 10, J = 11 etc.
+                    }
+                    cardValueList.Sort();
+                    if (Straight(cardValueList, true))
+                    {
+                        return 900; //Skickar tillbaka värdet av en straight flush; 900. Näst högst möjliga styrka.
+                    }
+                }
             }
             
 
             return strength;
+        }
+        static bool Straight(List<int> cardValueList, bool sameSuit)
+        {
+            //Fixa funktion som kollar ifall spelaren har en stege. Om sameSuit = true har spelaren en straight flush. Annars har spelaren en straight.
+
+
+            bool straight = false;
+
+            return straight;
         }
         static int WinningHand(int player1HandStrength, int player2HandStrength)
         {
