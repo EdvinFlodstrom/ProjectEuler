@@ -242,11 +242,11 @@ namespace ProjectEuler
 
                         
                         player1Hand.Clear();
+                        player1Hand.Add("3C");
+                        player1Hand.Add("9D");
+                        player1Hand.Add("3S");
+                        player1Hand.Add("3H");
                         player1Hand.Add("3D");
-                        player1Hand.Add("2D");
-                        player1Hand.Add("5D");
-                        player1Hand.Add("1D");
-                        player1Hand.Add("4D");
                         
 
 
@@ -277,6 +277,40 @@ namespace ProjectEuler
         }
         static int HandStrength(List<string> hand)
         {
+            List<int> cardValueList = new List<int>(); //Sorterad lista av spelarens kort.
+            foreach (string item in hand)
+            {
+                char cardChar = item[0];
+                int cardValue = 0;
+                if (cardChar == 'T')
+                {
+                    cardValue = 10;
+                }
+                else if (cardChar == 'J')
+                {
+                    cardValue = 11;
+                }
+                else if (cardChar == 'Q')
+                {
+                    cardValue = 12;
+                }
+                else if (cardChar == 'K')
+                {
+                    cardValue = 13;
+                }
+                else if (cardChar == 'A')
+                {
+                    cardValue = 14;
+                }
+                else
+                {
+                    cardValue = cardChar - '0';
+                }
+                cardValueList.Add(cardValue); //Sparar värdena av korten i en lista. Klädda kort (även tio) räknas om till en int-vänlig ekvivalent. T = 10, J = 11 etc.
+            }
+            cardValueList.Sort(); //Sorterar värdena i storleksordning för att göra en senare funktion mer simpel.
+            int firstCard = cardValueList[0];
+
             bool royalFlush = false;
             int strength = 0;
             bool sameSuit = true;
@@ -317,56 +351,64 @@ namespace ProjectEuler
                     return 999; //Skickar tillbaka värdet av en royal flush; 999. Högst möjliga styrka.
                 }
                 else //Kollar ifall spelaren har en straight flush
-                {
-                    List<int> cardValueList = new List<int>();
-                    foreach (string item in hand)
-                    {
-                        char cardChar = item[0];
-                        int cardValue = 0;
-                        if (cardChar == 'T')
-                        {
-                            cardValue = 10;
-                        }
-                        else if (cardChar == 'J')
-                        {
-                            cardValue = 11;
-                        }
-                        else if (cardChar == 'Q')
-                        {
-                            cardValue = 12;
-                        }
-                        else if (cardChar == 'K')
-                        {
-                            cardValue = 13;
-                        }
-                        else if (cardChar == 'A')
-                        {
-                            cardValue = 14;
-                        }
-                        else
-                        {
-                            cardValue = cardChar - '0';
-                        }
-                        cardValueList.Add(cardValue); //Sparar värdena av korten i en lista. Klädda kort (även tio) räknas om till en int-vänlig ekvivalent. T = 10, J = 11 etc.
-                    }
-                    cardValueList.Sort();
-                    if (Straight(cardValueList, true))
+                {                    
+                    if (Straight(cardValueList))
                     {
                         return 900; //Skickar tillbaka värdet av en straight flush; 900. Näst högst möjliga styrka.
                     }
                 }
             }
             
-
+            if (XOfAKind(cardValueList, 4))
+            {
+                return 800; //Skickar tillbaka värdet av four of a kind.
+            }
+         
             return strength;
         }
-        static bool Straight(List<int> cardValueList, bool sameSuit)
+        static bool XOfAKind(List<int> cardValueList, int XOfAKindValue)
         {
-            //Fixa funktion som kollar ifall spelaren har en stege. Om sameSuit = true har spelaren en straight flush. Annars har spelaren en straight.
+            int valueOfAKindLoopValue = 0;
+            int indexValue = 1;
+            int xOfAKindCard = cardValueList[indexValue];
 
+            foreach (int item in cardValueList) //Foreach-loop som kollar för X (värde som 3 eller 4) of a kind.
+            {
+                if (item == xOfAKindCard)
+                {
+                    valueOfAKindLoopValue++;
+                }
+                else if (item != xOfAKindCard && valueOfAKindLoopValue == 0)
+                {
+                    indexValue++;
+                    xOfAKindCard = cardValueList[indexValue];                    
+                }
+                if (valueOfAKindLoopValue >= XOfAKindValue)
+                {
+                    return true; //Skickar ifall spelaren har x of a kind.
+                }
+            }
 
+            return false;
+        }
+        static bool Straight(List<int> cardValueList)
+        {
             bool straight = false;
 
+            int currentCardValue = cardValueList[0] - 1; //Litet knep för att se till att foreach-loopen alltid körs minst en gång.
+            foreach (int item in cardValueList)
+            {
+                if (item == currentCardValue + 1)
+                {
+                    straight = true;
+                }
+                else
+                {
+                    straight = false;
+                    return straight;
+                }
+                currentCardValue = item;
+            }
             return straight;
         }
         static int WinningHand(int player1HandStrength, int player2HandStrength)
