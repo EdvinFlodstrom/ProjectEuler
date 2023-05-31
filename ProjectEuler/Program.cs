@@ -240,32 +240,84 @@ namespace ProjectEuler
                             }
                         }
 
+                        /*
+                        foreach (string item in player1Hand)
+                        {
+                            Console.WriteLine(item);
+                        }
+                        foreach (string item in player2Hand)
+                        {
+                            Console.WriteLine(item);
+                        }
                         
                         player1Hand.Clear();
-                        player1Hand.Add("3C");
-                        player1Hand.Add("9D");
-                        player1Hand.Add("3S");
-                        player1Hand.Add("3H");
-                        player1Hand.Add("3D");
+                        player1Hand.Add("2H");
+                        player1Hand.Add("2D");
+                        player1Hand.Add("4C");
+                        player1Hand.Add("4D");
+                        player1Hand.Add("4S");
+
+                        player2Hand.Clear();
+                        player2Hand.Add("3C");
+                        player2Hand.Add("3D");
+                        player2Hand.Add("3S");
+                        player2Hand.Add("9S");
+                        player2Hand.Add("9D");
+                        */
+
+                        player1HandStrength = HandStrength(player1Hand, false, false); //Beräknar styrkan av spelarnas kort, i en int.
+                        player2HandStrength = HandStrength(player2Hand, false, false);
                         
-
-
-                        player1HandStrength = HandStrength(player1Hand); //Beräknar styrkan av spelarnas kort, i en int.
-                        //player2HandStrength = HandStrength(player2Hand);
-                        if (player1HandStrength > 10) //Hela denna if-sats är endast till för debugging.
+                        if (player1HandStrength >= 700 && player1HandStrength < 800 && player2HandStrength >= 700 && player2HandStrength < 800)
                         {
-                            Console.WriteLine("p1 strength " + player1HandStrength);
-                            foreach (string item in player1Hand)
+                            player1HandStrength = 0;
+                            player2HandStrength = 0;
+                        }
+                        if (player1HandStrength >= 300 && player1HandStrength < 400 && player2HandStrength >= 300 && player2HandStrength < 400)
+                        {
+                            player1HandStrength = 0;
+                            player2HandStrength = 0;
+                        }
+
+                        if (player1HandStrength > player2HandStrength) //Avgör vilken av spelarna som hade bäst hand, och ökar vinnarens antal vinster med 1.
+                        {
+                            player1Wins++; 
+                        }
+                        else if (player1HandStrength == player2HandStrength)
+                        {
+                            player1HandStrength = HandStrength(player1Hand, true, false);
+                            player2HandStrength = HandStrength(player2Hand, true, false);
+
+                            if (player1HandStrength == player2HandStrength)
                             {
-                                Console.WriteLine(item);
-                            }                            
+                                player1HandStrength = HandStrength(player1Hand, true, true);
+                                player2HandStrength = HandStrength(player2Hand, true, true);
+                            }
+
+                            while (player1HandStrength == player2HandStrength)
+                            {                            
+                                string player1TieCard = player1Hand.Last();
+                                string player2TieCard = player2Hand.Last();
+
+                                player1HandStrength = player1TieCard[0];
+                                player2HandStrength = player2TieCard[0];
+
+                                if (player1HandStrength == player2HandStrength)
+                                {
+                                    player1Hand.Remove(player1TieCard);
+                                    player2Hand.Remove(player2TieCard);
+                                }                                
+                            }
+                            if (player1HandStrength > player2HandStrength)
+                            {
+                                player1Wins++;
+                            }
+                            else
+                            {
+                                player2Wins++;
+                            }
                         }
-                        break; //Avbryter programmet efter en körning. *ENDAST FÖR DEBUGGING*
-                        if (WinningHand(player1HandStrength, player2HandStrength) == 1)
-                        {
-                            player1Wins++; //Avgör vilken av spelarna som hade bäst hand, och ökar vinnarens antal vinster med 1.
-                        }
-                        else
+                        else 
                         {
                             player2Wins++;
                         }
@@ -274,8 +326,11 @@ namespace ProjectEuler
                     }
                 }
             }
+            Console.WriteLine("Spelare 1 vann " + player1Wins + " gånger.");
+            Console.WriteLine("Spelare 2 vann " + player2Wins + " gånger.");
+            Console.WriteLine("Matcher spelade: " + (player1Wins + player2Wins));
         }
-        static int HandStrength(List<string> hand)
+        static int HandStrength(List<string> hand, bool tie, bool tieTwice)
         {
             List<int> cardValueList = new List<int>(); //Sorterad lista av spelarens kort.
             foreach (string item in hand)
@@ -311,8 +366,9 @@ namespace ProjectEuler
             cardValueList.Sort(); //Sorterar värdena i storleksordning för att göra en senare funktion mer simpel.
             int firstCard = cardValueList[0];
 
-            bool royalFlush = false;
             int strength = 0;
+            int bonusPointsForHighCards = 0;
+            bool royalFlush = false;
             bool sameSuit = true;
             List<char> cardRanks = new List<char>();            
             cardRanks.Add('T');
@@ -320,6 +376,25 @@ namespace ProjectEuler
             cardRanks.Add('Q');
             cardRanks.Add('K');
             cardRanks.Add('A');
+
+            if (tie)
+            {
+                if (!tieTwice)
+                {
+                    strength = XOfAKind(cardValueList, 3, false);
+                    if (strength != 0)
+                    {
+                        strength += 400;
+                        return strength; //Värdet av three of a kind
+                    }
+                }
+                strength = XOfAKind(cardValueList, 2, false);
+                if (strength != 0)
+                {
+                    strength += 200;
+                    return strength; //Värdet av ett par
+                }
+            }
 
             string firstChard = hand[0];
             char suit = firstChard[1];
@@ -329,7 +404,7 @@ namespace ProjectEuler
                 {
                     sameSuit = false;
                 }
-            }
+            }           
 
             if (sameSuit) //Är spelarens alla kort i samma färg?
             {                
@@ -354,42 +429,146 @@ namespace ProjectEuler
                 {                    
                     if (Straight(cardValueList))
                     {
-                        return 900; //Skickar tillbaka värdet av en straight flush; 900. Näst högst möjliga styrka.
+                        foreach (int item in cardValueList)
+                        {
+                            bonusPointsForHighCards += item;
+                        }
+                        return 900 + bonusPointsForHighCards; //Skickar tillbaka värdet av en straight flush; 900. Näst högst möjliga styrka.
                     }
                 }
             }
             
-            if (XOfAKind(cardValueList, 4))
+            strength = XOfAKind(cardValueList, 4, false);
+            if (strength != 0)
             {
-                return 800; //Skickar tillbaka värdet av four of a kind.
+                strength += 800;
+                return strength; //Skickar tillbaka värdet av four of a kind.
             }
-         
-            return strength;
-        }
-        static bool XOfAKind(List<int> cardValueList, int XOfAKindValue)
-        {
-            int valueOfAKindLoopValue = 0;
-            int indexValue = 1;
-            int xOfAKindCard = cardValueList[indexValue];
+            
+            strength = XOfAKind(cardValueList, 3, true);
+            if (strength != 0)
+            {
+                strength += 700;
+                return strength; //Skickar tillbaka värdet av full house.
+            }
+            
+            if (sameSuit)
+            {
+                foreach (int item in cardValueList)
+                {
+                    bonusPointsForHighCards += item;
+                }
+                return 600 + bonusPointsForHighCards; //Skickar tillbaka värdet av flush.
+            }
 
+            if (Straight(cardValueList))
+            {
+                foreach (int item in cardValueList)
+                {
+                    bonusPointsForHighCards += item;
+                }
+                return 500 + bonusPointsForHighCards; //Skickar tillbaka värdet av en straight (ej straight flush eftersom !sameSuit).
+            }
+
+            strength = XOfAKind(cardValueList, 3, false);
+            if (strength != 0)
+            {
+                strength += 400;
+                return strength; //Skickar tillbaka värdet av three of a kind.
+            }
+
+            strength = XOfAKind(cardValueList, 2, true);
+            if (strength != 0)
+            {
+                strength += 300;
+                return strength; //Skickar tillbaka värdet av två par.
+            }
+
+            strength = XOfAKind(cardValueList, 2, false);
+            if (strength != 0)
+            {
+                strength += 200;
+                return strength; //Skickar tillbaka värdet av ett par.
+            }
+            
+            return cardValueList.Last();
+        }
+        static int XOfAKind(List<int> cardValueList, int XOfAKindValue, bool twoChecks)
+        {
+            int strength = 0; //Denna variabel utgör bonuspoängen som räknas med beroende på kortens individuella styrka. Om den inte är 0 så har spelaren t.ex. ett par.
+            bool equalCards = false;
+            bool fullHouseOrTwoPairs = false;
+            int forbiddenNumber = 0;            
+            restart: //Tillbakahopp så att undanstående foreach-loop kan användas två gånger per gång funktionen kallas.
+            int indexValue = 1;
+            int valueOfAKindLoopValue = 0;
+            int xOfAKindCard = cardValueList[indexValue];
+            
             foreach (int item in cardValueList) //Foreach-loop som kollar för X (värde som 3 eller 4) of a kind.
             {
-                if (item == xOfAKindCard)
+                equalCards = false;
+                if (item == xOfAKindCard && item != forbiddenNumber)
                 {
                     valueOfAKindLoopValue++;
+                    equalCards = true;
                 }
-                else if (item != xOfAKindCard && valueOfAKindLoopValue == 0)
-                {
+                else if (item != xOfAKindCard && valueOfAKindLoopValue == 0 || item == forbiddenNumber)
+                {                    
                     indexValue++;
-                    xOfAKindCard = cardValueList[indexValue];                    
+                    if (indexValue >= 5)
+                    {
+                        return 0; //Ser till att funktionen inte stendör genom att försöka sätta kortet till index [5] (utanför listan).
+                    }
+                    xOfAKindCard = cardValueList[indexValue];
                 }
                 if (valueOfAKindLoopValue >= XOfAKindValue)
                 {
-                    return true; //Skickar ifall spelaren har x of a kind.
+                    if (!twoChecks)
+                    {
+                        if (XOfAKindValue == 2)
+                        {
+                            strength = xOfAKindCard * 2;
+                        }
+                        else if (XOfAKindValue == 3)
+                        {
+                            strength = xOfAKindCard * 3;
+                        }
+                        else if (XOfAKindValue == 4)
+                        {
+                            strength = xOfAKindCard * 4;
+                        }
+                        return strength; //Skickar ifall spelaren har x of a kind och programmet INTE är ute efter flera par/full house.
+                    }
+                    else
+                    {
+                        strength += xOfAKindCard * valueOfAKindLoopValue;
+                        if (fullHouseOrTwoPairs)
+                        {
+                            return strength; //Koden kommer hit om spelaren först har ett par eller trepar, och sedan har ett till par.
+                        }
+                        forbiddenNumber = xOfAKindCard;
+                        XOfAKindValue = 2; //Om spelaren letar efter full house eller tvåpar så består den andra kortkombinationen ALLTID av två kort.
+                        fullHouseOrTwoPairs = true;
+                        goto restart;
+                    }
+                }
+                else
+                {
+                    if (valueOfAKindLoopValue > 0 && !equalCards)
+                    {
+                        if (fullHouseOrTwoPairs)
+                        {
+                            return 0;
+                        }
+                        strength += xOfAKindCard * valueOfAKindLoopValue;
+                        forbiddenNumber = xOfAKindCard;
+                        fullHouseOrTwoPairs = true;
+                        indexValue = cardValueList.FindIndex(x => x == item);
+                        goto restart;
+                    }
                 }
             }
-
-            return false;
+            return 0;
         }
         static bool Straight(List<int> cardValueList)
         {
@@ -410,20 +589,6 @@ namespace ProjectEuler
                 currentCardValue = item;
             }
             return straight;
-        }
-        static int WinningHand(int player1HandStrength, int player2HandStrength)
-        {
-            int winningPlayer = 0;
-
-            if (player1HandStrength > player2HandStrength)
-            {
-                winningPlayer = 1;
-            }
-            else
-            {
-                winningPlayer = 2;
-            }
-            return winningPlayer;
         }
     }    
 }
