@@ -9,7 +9,7 @@ namespace ProjectEuler
     {
         static void Main(string[] args)
         {
-            Problem_54();
+            Problem_10();
         }
         static void Problem_1()
         {
@@ -238,34 +238,7 @@ namespace ProjectEuler
                             {
                                 player2Hand.Add(cards[i]); //Spelare 2 för resten av korten, alltså de sista fem.
                             }
-                        }
-
-                        bool theTemporary = false;
-
-                        /*
-                        foreach (string item in player1Hand)
-                        {
-                            Console.WriteLine(item);
-                        }
-                        foreach (string item in player2Hand)
-                        {
-                            Console.WriteLine(item);
-                        }
-                        
-                        player1Hand.Clear();
-                        player1Hand.Add("2H");
-                        player1Hand.Add("2D");
-                        player1Hand.Add("4C");
-                        player1Hand.Add("4D");
-                        player1Hand.Add("4S");
-
-                        player2Hand.Clear();
-                        player2Hand.Add("3C");
-                        player2Hand.Add("3D");
-                        player2Hand.Add("3S");
-                        player2Hand.Add("9S");
-                        player2Hand.Add("9D");
-                        */
+                        }                       
 
                         player1HandStrength = HandStrength(player1Hand, false, false); //Beräknar styrkan av spelarnas kort, i en int.
                         player2HandStrength = HandStrength(player2Hand, false, false);
@@ -604,5 +577,18 @@ namespace ProjectEuler
             }
             return straight;
         }
-    }    
+        static void Problem_10()
+        {
+            long sumOfPrimes = 2;
+
+            for (int i = 1; i < 2000000; i++)
+            {
+                if (PrimeChecker(i))
+                {
+                    sumOfPrimes += i;
+                }
+            }            
+            Console.WriteLine("The sum of all primes below 2000000 is: " + sumOfPrimes);
+        }
+    }   
 }
