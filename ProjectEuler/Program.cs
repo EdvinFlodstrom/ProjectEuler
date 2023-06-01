@@ -240,6 +240,8 @@ namespace ProjectEuler
                             }
                         }
 
+                        bool theTemporary = false;
+
                         /*
                         foreach (string item in player1Hand)
                         {
@@ -283,8 +285,8 @@ namespace ProjectEuler
                         {
                             player1Wins++; 
                         }
-                        else if (player1HandStrength == player2HandStrength)
-                        {
+                        else if (player1HandStrength == player2HandStrength) //Följande är endast till för att avgöra vilken spelare som har bäst andrahandskort, ifall de gick lika först.
+                        {                      
                             player1HandStrength = HandStrength(player1Hand, true, false);
                             player2HandStrength = HandStrength(player2Hand, true, false);
 
@@ -293,20 +295,22 @@ namespace ProjectEuler
                                 player1HandStrength = HandStrength(player1Hand, true, true);
                                 player2HandStrength = HandStrength(player2Hand, true, true);
                             }
-
                             while (player1HandStrength == player2HandStrength)
-                            {                            
-                                string player1TieCard = player1Hand.Last();
-                                string player2TieCard = player2Hand.Last();
+                            {
+                                List<int> cardValueListP1 = new List<int>(); //Lista av korten spelare 1 har, endast i tal.
+                                List<int> cardValueListP2 = new List<int>(); //Lista av korten spelare 2 har, endast i tal.
 
-                                player1HandStrength = player1TieCard[0];
-                                player2HandStrength = player2TieCard[0];
+                                cardValueListP1 = CardListSorter(player1Hand);
+                                cardValueListP2 = CardListSorter(player2Hand);
+
+                                player1HandStrength = cardValueListP1.Last();
+                                player2HandStrength = cardValueListP2.Last(); 
 
                                 if (player1HandStrength == player2HandStrength)
                                 {
-                                    player1Hand.Remove(player1TieCard);
-                                    player2Hand.Remove(player2TieCard);
-                                }                                
+                                    cardValueListP1.Remove(player1HandStrength);
+                                    cardValueListP2.Remove(player2HandStrength);
+                                }
                             }
                             if (player1HandStrength > player2HandStrength)
                             {
@@ -314,7 +318,7 @@ namespace ProjectEuler
                             }
                             else
                             {
-                                player2Wins++;
+                                player2Wins++;                                
                             }
                         }
                         else 
@@ -333,37 +337,9 @@ namespace ProjectEuler
         static int HandStrength(List<string> hand, bool tie, bool tieTwice)
         {
             List<int> cardValueList = new List<int>(); //Sorterad lista av spelarens kort.
-            foreach (string item in hand)
-            {
-                char cardChar = item[0];
-                int cardValue = 0;
-                if (cardChar == 'T')
-                {
-                    cardValue = 10;
-                }
-                else if (cardChar == 'J')
-                {
-                    cardValue = 11;
-                }
-                else if (cardChar == 'Q')
-                {
-                    cardValue = 12;
-                }
-                else if (cardChar == 'K')
-                {
-                    cardValue = 13;
-                }
-                else if (cardChar == 'A')
-                {
-                    cardValue = 14;
-                }
-                else
-                {
-                    cardValue = cardChar - '0';
-                }
-                cardValueList.Add(cardValue); //Sparar värdena av korten i en lista. Klädda kort (även tio) räknas om till en int-vänlig ekvivalent. T = 10, J = 11 etc.
-            }
-            cardValueList.Sort(); //Sorterar värdena i storleksordning för att göra en senare funktion mer simpel.
+
+            cardValueList = CardListSorter(hand);
+
             int firstCard = cardValueList[0];
 
             int strength = 0;
@@ -492,6 +468,44 @@ namespace ProjectEuler
             }
             
             return cardValueList.Last();
+        }
+        static List<int> CardListSorter(List<string> hand)
+        {
+            List<int> cardValueList = new List<int>(); //Sorterad lista av spelarens kort.
+
+            foreach (string item in hand)
+            {
+                char cardChar = item[0];
+                int cardValue = 0;
+                if (cardChar == 'T')
+                {
+                    cardValue = 10;
+                }
+                else if (cardChar == 'J')
+                {
+                    cardValue = 11;
+                }
+                else if (cardChar == 'Q')
+                {
+                    cardValue = 12;
+                }
+                else if (cardChar == 'K')
+                {
+                    cardValue = 13;
+                }
+                else if (cardChar == 'A')
+                {
+                    cardValue = 14;
+                }
+                else
+                {
+                    cardValue = cardChar - '0';
+                }
+                cardValueList.Add(cardValue); //Sparar värdena av korten i en lista. Klädda kort (även tio) räknas om till en int-vänlig ekvivalent. T = 10, J = 11 etc.
+            }
+            cardValueList.Sort(); //Sorterar värdena i storleksordning för att göra en senare funktion mer simpel.
+
+            return cardValueList;
         }
         static int XOfAKind(List<int> cardValueList, int XOfAKindValue, bool twoChecks)
         {
