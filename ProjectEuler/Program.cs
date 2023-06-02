@@ -9,7 +9,7 @@ namespace ProjectEuler
     {
         static void Main(string[] args)
         {
-            Problem_10();
+            Problem_41();
         }
         static void Problem_1()
         {
@@ -589,6 +589,37 @@ namespace ProjectEuler
                 }
             }            
             Console.WriteLine("The sum of all primes below 2000000 is: " + sumOfPrimes);
+        }
+        static void Problem_41()
+        {
+            List<long> allowedDigits = new List<long>();
+
+            for (int i = 1; i > 0; i++) //Kör loopen tills värdet är större än en int kan klara av. Förhoppningsvis räcker det för problem 41.
+            {
+                allowedDigits.Add(i);
+
+                int value = 1;
+
+                for (int x = 1; x <= i; x++)
+                {
+                    value = value * x;
+                }
+                //Varabeln value har här antalet kombinationer som i (antalet digits) kan anta.
+                for (int y = 0; y <= value; y++) //Fixa for-loop som gör olika kombinationer av talen 1 till i, value gånger.
+                {
+                    
+                }
+            }
+
+            /*
+             * 1,2,3 = 6		    6*4 = 24
+               1,2,3,4 = 24		    24*5 = 120
+               1,2,3,4,5 = 120		120*6 = 720
+               1,2,3,4,5,6 = 720
+
+            */
+
+
         }
     }   
 }
